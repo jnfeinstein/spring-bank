@@ -1,12 +1,10 @@
-package io.joel.springbank
+package io.joel.springbank.api
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class SpringBankApplicationTests {
-
-	@Test
-	fun contextLoads() {
-	}
+class SpringBankApiApplicationTests {
+    @Test
+    fun contextLoads() {}
 }

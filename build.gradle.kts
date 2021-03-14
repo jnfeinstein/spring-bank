@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
 	base
@@ -30,7 +31,7 @@ allprojects {
 subprojects {
 	tasks.withType<KotlinCompile> {
 		kotlinOptions {
-			freeCompilerArgs = listOf("-Xjsr305=strict", "-Xopt-in=kotlin.RequiresOptIn")
+			freeCompilerArgs += listOf("-Xjsr305=strict", "-Xopt-in=kotlin.RequiresOptIn")
 			jvmTarget = "15"
 			useIR = true
 		}
@@ -39,5 +40,4 @@ subprojects {
 	tasks.withType<Test> {
 		useJUnitPlatform()
 	}
-
 }

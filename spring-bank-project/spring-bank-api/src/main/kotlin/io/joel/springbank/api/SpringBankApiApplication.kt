@@ -1,5 +1,6 @@
-package io.joel.springbank
+package io.joel.springbank.api
 
+import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
@@ -7,5 +8,7 @@ import org.springframework.boot.runApplication
 class BankApplication
 
 fun main(args: Array<String>) {
-	runApplication<BankApplication>(*args)
+    runApplication<BankApplication>(*args) {
+        setBannerMode(Banner.Mode.OFF)
+    }
 }

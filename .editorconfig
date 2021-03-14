@@ -1,0 +1,3 @@
+[*.{kt,kts}]
+# Disable KTLint rule that prevents wildcard imports
+disabled_rules=filename,no-wildcard-imports
