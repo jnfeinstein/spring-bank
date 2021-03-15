@@ -2,7 +2,8 @@ package io.joel.springbank.api.controller
 
 import io.joel.springbank.api.db.Account
 import io.joel.springbank.api.db.AccountRepo
-import io.joel.springbank.dto.Request
+import io.joel.springbank.dto.CreateAccountRequest
+import io.joel.springbank.dto.UpdateAccountRequest
 import kotlinx.coroutines.flow.Flow
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -29,14 +30,14 @@ class AccountController(
     }
 
     @PostMapping
-    suspend fun createAccount(@RequestBody request: Request.CreateAccount): Account {
+    suspend fun createAccount(@RequestBody request: CreateAccountRequest): Account {
         return accountRepo.save(
             Account(name = request.name)
         )
     }
 
     @PutMapping
-    suspend fun updateAccount(@RequestBody request: Request.UpdateAccount): ResponseEntity<Account> {
+    suspend fun updateAccount(@RequestBody request: UpdateAccountRequest): ResponseEntity<Account> {
         return accountRepo.findById(request.id.toLong())?.let {
             it.name = request.name
             accountRepo.save(it)
