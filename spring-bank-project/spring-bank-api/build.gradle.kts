@@ -6,7 +6,7 @@ plugins {
     kotlin("plugin.spring")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_15
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 dependencies {
     implementation(project(":spring-bank-project:spring-bank-dto"))

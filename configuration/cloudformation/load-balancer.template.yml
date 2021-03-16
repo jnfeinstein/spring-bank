@@ -1,0 +1,158 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Parameters:
+  CertificateArn:
+    Type: String
+
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+
+  VpcId:
+    Type: String
+
+
+Conditions:
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, ""]]
+
+
+Mappings:
+  Region2ELBAccountId:
+    us-east-1:
+      AccountId: 127311923021
+    us-east-2:
+      AccountId: 033677994240
+    us-west-1:
+      AccountId: 027434742980
+    us-west-2:
+      AccountId: 797873946194
+
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub ${AWS::StackName}-alb
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "TCP"
+          FromPort: 443
+          ToPort: 443
+      VpcId: !Ref VpcId
+
+#  LogBucket:
+#    Type: AWS::S3::Bucket
+#    Properties:
+#      BucketEncryption:
+#        ServerSideEncryptionConfiguration:
+#          - ServerSideEncryptionByDefault:
+#              SSEAlgorithm: AES256
+#      PublicAccessBlockConfiguration:
+#        BlockPublicAcls: true
+#        BlockPublicPolicy: true
+#        IgnorePublicAcls: true
+#        RestrictPublicBuckets: true
+#
+#  LogBucketPolicy:
+#    Type: AWS::S3::BucketPolicy
+#    Description: Grant write permissions to AWS ELB account
+#    Properties:
+#      Bucket: !Ref LogBucket
+#      PolicyDocument:
+#        Version: 2012-10-17
+#        Statement:
+#          - Resource:
+#              - !Sub arn:aws:s3:::${LogBucket}/*
+#            Principal:
+#              AWS: !FindInMap [Region2ELBAccountId, !Ref 'AWS::Region', AccountId]
+#            Effect: Allow
+#            Action:
+#              - s3:PutObject
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+#    DependsOn: LogBucketPolicy
+    Properties:
+      LoadBalancerAttributes:
+#        - Key: access_logs.s3.enabled
+#          Value: true
+#        - Key: access_logs.s3.bucket
+#          Value: !Ref LogBucket
+        - Key: idle_timeout.timeout_seconds
+          Value: 300
+      Subnets: !Ref Subnets
+      SecurityGroups:
+        - !Ref SecurityGroup
+
+  ServiceTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: LoadBalancer
+    Properties:
+      VpcId: !Ref VpcId
+      Port: 80
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /status
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      TargetType: ip
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+
+  ServiceLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates: !If
+        - HasCertificate
+        - - CertificateArn: !Ref CertificateArn
+        - !Ref "AWS::NoValue"
+
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: !If [HasCertificate, 443, 80]
+      Protocol: !If [HasCertificate, HTTPS, HTTP]
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 404
+
+  ServiceListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ServiceLoadBalancerListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /**
+      Actions:
+        - TargetGroupArn: !Ref ServiceTargetGroup
+          Type: forward
+
+  ServiceLoadBalancerSSLRedirect:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: HasCertificate
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Protocol: HTTPS
+            Port: 443
+            StatusCode: HTTP_301
+
+Outputs:
+  LoadBalancerId:
+    Value: !Ref LoadBalancer
+
+  ServiceTargetGroup:
+    Value: !Ref ServiceTargetGroup
+
+  SecurityGroup:
+    Value: !Ref SecurityGroup

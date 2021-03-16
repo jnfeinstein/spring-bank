@@ -1,0 +1,111 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Parameters:
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+  DatabaseName:
+    Type: String
+    Default: postgres
+
+  Username:
+    Type: String
+    Default: postgres
+
+
+Resources:
+  EncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}
+      TargetKeyId: !Ref EncryptionKey
+
+  EncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: "*"
+
+  PasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Name: !Sub ${AWS::StackName}/DBPassword
+
+  ClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub ${AWS::StackName}-db-client-sg
+      VpcId: !Ref VpcId
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub ${AWS::StackName}-db-sg
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref ClientSecurityGroup
+          ToPort: 5432
+          FromPort: 5432
+          IpProtocol: TCP
+      VpcId: !Ref VpcId
+
+  SubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Ref AWS::StackName
+      SubnetIds: !Ref Subnets
+
+  Cluster:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Snapshot
+    Properties:
+      BackupRetentionPeriod: 7
+      MasterUsername: !Ref Username
+      MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref PasswordSecret, ':SecretString}}' ]]
+      DatabaseName: !Ref DatabaseName
+      DeletionProtection: false
+      Engine: aurora-postgresql
+      EngineMode: serverless
+      EngineVersion: 10.12
+      ScalingConfiguration:
+        AutoPause: true
+        MaxCapacity: 16
+        MinCapacity: 2
+      StorageEncrypted: true
+      KmsKeyId: !Ref EncryptionKeyAlias
+      DBSubnetGroupName: !Ref SubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref SecurityGroup
+
+
+Outputs:
+  ClientSecurityGroup:
+    Value: !Ref ClientSecurityGroup
+
+  DatabaseName:
+    Value: !Ref DatabaseName
+
+  Username:
+    Value: !Ref Username
+
+  PasswordSecret:
+    Value: !Ref PasswordSecret
+
+  Endpoint:
+    Value: !Sub ${Cluster.Endpoint.Address}:${Cluster.Endpoint.Port}
+
+  SecurityGroup:
+    Value: !Ref SecurityGroup

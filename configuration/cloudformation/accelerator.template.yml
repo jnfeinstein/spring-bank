@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Parameters:
+  AcceleratorName:
+    Type: String
+    Default: Accelerator
+
+  DomainName:
+    Type: String
+
+  EndpointId:
+    Type: String
+
+  HostedZoneId:
+    Type: String
+
+
+Resources:
+  Accelerator:
+    Type: AWS::GlobalAccelerator::Accelerator
+    Properties:
+      Name: !Ref AcceleratorName
+
+  AcceleratorListener:
+    Type: AWS::GlobalAccelerator::Listener
+    Properties:
+      AcceleratorArn: !Ref Accelerator
+      Protocol: TCP
+      PortRanges:
+        - FromPort: 443
+          ToPort: 443
+
+  AcceleratorEndpointGroup:
+    Type: AWS::GlobalAccelerator::EndpointGroup
+    Properties:
+      ListenerArn: !Ref AcceleratorListener
+      EndpointGroupRegion: !Ref AWS::Region
+      EndpointConfigurations:
+        - EndpointId: !Ref EndpointId
+
+  AcceleratorRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        HostedZoneId: Z2BJ6XQ5FK7U4H
+        DNSName: !GetAtt Accelerator.DnsName
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A

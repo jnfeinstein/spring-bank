@@ -1,0 +1,81 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Parameters:
+  CertificateArn:
+    Type: String
+    Default: ""
+
+  DomainName:
+    Type: String
+
+  HostedZoneId:
+    Type: String
+
+  ImageRepository:
+    Type: String
+    Description: URI of ECR repository containing Docker images
+
+  Tag:
+    Type: String
+    Description: Version of ECR images to deploy
+
+
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./vpc.template.yml
+      Parameters:
+        Name: !Ref AWS::StackName
+        VpcCIDR: 10.0.0.0/16
+        PublicSubnet1CIDR: 10.0.0.0/20
+        PublicSubnet2CIDR: 10.0.16.0/20
+        PublicSubnet3CIDR: 10.0.32.0/20
+        PrivateSubnet1CIDR: 10.0.48.0/20
+        PrivateSubnet2CIDR: 10.0.64.0/20
+        PrivateSubnet3CIDR: 10.0.80.0/20
+
+  LoadBalancer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./load-balancer.template.yml
+      Parameters:
+        CertificateArn: !Ref CertificateArn
+        Subnets: !GetAtt VPC.Outputs.PublicSubnets
+        VpcId: !GetAtt VPC.Outputs.VpcId
+
+  Accelerator:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./accelerator.template.yml
+      Parameters:
+        DomainName: !Ref DomainName
+        EndpointId: !GetAtt LoadBalancer.Outputs.LoadBalancerId
+        HostedZoneId: !Ref HostedZoneId
+
+  Database:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./database.template.yml
+      Parameters:
+        Subnets: !GetAtt VPC.Outputs.PublicSubnets
+        VpcId: !GetAtt VPC.Outputs.VpcId
+
+  Service:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./service.template.yml
+      Parameters:
+        ImageRepositoryUri: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageRepository}
+        Tag: !Ref Tag
+        LoadBalancerSecurityGroup: !GetAtt LoadBalancer.Outputs.SecurityGroup
+        ServiceTargetGroup: !GetAtt LoadBalancer.Outputs.ServiceTargetGroup
+        Subnets: !GetAtt VPC.Outputs.PrivateSubnets
+        VpcId: !GetAtt VPC.Outputs.VpcId
+        DBClientSecurityGroup: !GetAtt Database.Outputs.ClientSecurityGroup
+        DBName: !GetAtt Database.Outputs.DatabaseName
+        DBEndpoint: !GetAtt Database.Outputs.Endpoint
+        DBPasswordSecret: !GetAtt Database.Outputs.PasswordSecret
+        DBUsername: !GetAtt Database.Outputs.Username
