@@ -217,6 +217,21 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
 
+  ServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      DnsConfig:
+        RoutingPolicy: MULTIVALUE
+        DnsRecords:
+          - TTL: 60
+            Type: A
+          - TTL: 60
+            Type: SRV
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: primary
+      NamespaceId: !Ref PrivateNamespace
+
   Service:
     Type: AWS::ECS::Service
     Properties:
@@ -236,6 +251,9 @@ Resources:
             - !Ref SecurityGroup
             - !Ref DBClientSecurityGroup
           Subnets: !Ref Subnets
+      ServiceRegistries:
+        - RegistryArn: !GetAtt ServiceDiscovery.Arn
+          Port: 80
       LoadBalancers:
         - ContainerName: primary
           ContainerPort: 80
@@ -283,3 +301,7 @@ Resources:
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         TargetValue: 50
+
+Outputs:
+  ServicePrivateUrl:
+    Value: !Join [".", [!GetAtt ServiceDiscovery.Name, "service.local" ]]
