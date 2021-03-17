@@ -157,7 +157,7 @@ Resources:
       TaskRoleArn: !Ref TaskRole
       ContainerDefinitions:
         - Name: primary
-          Image: !Sub ${ImageRepositoryUri}:spring-bank-api.${Tag}
+          Image: !Sub ${ImageRepositoryUri}:${Tag}
           Cpu: !Ref EC2Cpu
           Memory: !Ref EC2Memory
           Essential: true
