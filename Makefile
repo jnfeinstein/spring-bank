@@ -5,6 +5,6 @@ docker-login:
  		docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 
 docker-push:
-	docker tag spring-bank/spring-bank-api:latest \
+	docker tag spring-bank/spring-bank-server:latest \
 		"$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(ECR_REPOSITORY):$(TAG)"
 	docker push "$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(ECR_REPOSITORY):$(TAG)"

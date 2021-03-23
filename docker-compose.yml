@@ -13,8 +13,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  spring-bank-api:
-    image: spring-bank/spring-bank-api:latest
+  spring-bank-server:
+    image: spring-bank/spring-bank-server:latest
     depends_on:
       - postgres
     ports:
