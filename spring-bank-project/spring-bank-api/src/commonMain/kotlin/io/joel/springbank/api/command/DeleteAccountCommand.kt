@@ -1,9 +1,10 @@
 package io.joel.springbank.api.command
 
-import io.joel.springbank.api.ObjectId
+import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 
 @JsExport
+@Serializable
 data class DeleteAccountCommand(
-    val id: ObjectId
+    val id: String,
 )

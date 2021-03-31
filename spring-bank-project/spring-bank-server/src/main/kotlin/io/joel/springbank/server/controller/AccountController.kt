@@ -1,6 +1,5 @@
 package io.joel.springbank.server.controller
 
-import io.joel.springbank.api.ObjectId
 import io.joel.springbank.api.command.CreateAccountCommand
 import io.joel.springbank.api.command.DeleteAccountCommand
 import io.joel.springbank.api.command.UpdateAccountCommand
@@ -14,6 +13,7 @@ import org.axonframework.messaging.responsetypes.ResponseTypes
 import org.axonframework.queryhandling.QueryGateway
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/accounts")
@@ -28,8 +28,8 @@ class AccountController(
     }
 
     @GetMapping("/{id}")
-    suspend fun getAccount(@PathVariable id: ObjectId): ResponseEntity<AccountView> {
-        return accountViewRepo.findById(id)?.let {
+    suspend fun getAccount(@PathVariable id: String): ResponseEntity<AccountView> {
+        return accountViewRepo.findById(UUID.fromString(id))?.let {
             ResponseEntity.ok(it)
         } ?: ResponseEntity.notFound().build()
     }
@@ -50,7 +50,7 @@ class AccountController(
     }
 
     @DeleteMapping("/{id}")
-    suspend fun deleteAccount(@PathVariable id: ObjectId) {
+    suspend fun deleteAccount(@PathVariable id: String) {
         commandGateway.sendAndWait<Unit>(DeleteAccountCommand(id))
     }
 

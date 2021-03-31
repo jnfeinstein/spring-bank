@@ -23,21 +23,21 @@ class AccountService(
     @EventHandler
     fun on(event: AccountCreatedEvent) = runBlocking {
         R2dbcEntityTemplate(connectionFactory).insert(
-            AccountView(id = event.id, name = event.name)
+            AccountView(id = UUID.fromString(event.id), name = event.name)
         ).awaitSingle()
-        queryUpdateEmitter.emit(UUID::class.java, { it == event.id }, event)
+        queryUpdateEmitter.emit(String::class.java, { it == event.id }, event)
     }
 
     @EventHandler
     fun on(event: AccountUpdatedEvent) = runBlocking {
-        accountViewRepo.findById(event.id)?.let {
+        accountViewRepo.findById(UUID.fromString(event.id))?.let {
             accountViewRepo.save(it.copy(name = event.name))
         }
-        queryUpdateEmitter.emit(UUID::class.java, { it == event.id }, event)
+        queryUpdateEmitter.emit(String::class.java, { it == event.id }, event)
     }
 
     @EventHandler
     fun on(event: AccountDeletedEvent) = runBlocking {
-        accountViewRepo.deleteById(event.id)
+        accountViewRepo.deleteById(UUID.fromString(event.id))
     }
 }

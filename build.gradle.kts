@@ -10,6 +10,7 @@ plugins {
 	id("org.springframework.boot") version Versions.SPRING_BOOT apply false
 	kotlin("jvm") version Versions.KOTLIN apply false
 	kotlin("multiplatform") version Versions.KOTLIN  apply false
+	kotlin("plugin.serialization") version Versions.KOTLIN  apply false
 	kotlin("plugin.spring") version Versions.KOTLIN  apply false
 }
 

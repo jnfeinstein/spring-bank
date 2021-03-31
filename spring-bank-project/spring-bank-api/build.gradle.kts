@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -14,6 +15,11 @@ kotlin {
         all {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("kotlin.js.ExperimentalJsExport")
+            languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
+
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.1.0")
+            }
         }
     }
 

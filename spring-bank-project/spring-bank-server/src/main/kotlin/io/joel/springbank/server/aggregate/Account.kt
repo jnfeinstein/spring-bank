@@ -16,7 +16,7 @@ import java.util.*
 @Aggregate
 class Account() {
     @AggregateIdentifier
-    private lateinit var id: UUID
+    private lateinit var id: String
 
     @CommandHandler
     constructor(command: CreateAccountCommand) : this() {

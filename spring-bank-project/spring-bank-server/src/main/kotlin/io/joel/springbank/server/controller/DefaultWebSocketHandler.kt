@@ -1,11 +1,10 @@
 package io.joel.springbank.server.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.joel.springbank.api.WebSocketProtocol
+import io.joel.springbank.api.Format
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.mono
+import kotlinx.serialization.ExperimentalSerializationApi
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.stereotype.Component
@@ -29,31 +28,29 @@ private typealias BeanName = String
 @Component
 class DefaultWebSocketHandler(
     private val beanFactory: BeanFactory,
-    private val objectMapper: ObjectMapper,
     private val context: CoroutineDispatcher = Dispatchers.Default,
 ) : WebSocketHandler, BeanPostProcessor {
-    private val webSocketRoutes: MutableMap<String, Triple<BeanName, Class<*>, Method>> = ConcurrentHashMap()
+    private val webSocketRoutes: MutableMap<String, Pair<BeanName, Method>> = ConcurrentHashMap()
 
     override fun postProcessAfterInitialization(bean: Any, beanName: String) = bean.apply {
         bean::class.java.methods.filter {
             it.isAnnotationPresent(WebSocketRoute::class.java)
         }.forEach {
             val clazz = it.parameters.first().type
-            val existingMapping = webSocketRoutes.putIfAbsent(clazz.canonicalName.toLowerCase(), Triple(beanName, clazz, it))
+            val existingMapping = webSocketRoutes.putIfAbsent(clazz.simpleName.toLowerCase(), beanName to it)
             check(existingMapping == null) {
                 "Type ${clazz.simpleName} associated with multiple WebSocket routes"
             }
         }
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class, ExperimentalSerializationApi::class)
     override fun handle(session: WebSocketSession) = session.send(
         session.receive().flatMap { message ->
-            val protocol = objectMapper.readValue<WebSocketProtocol>(message.payloadAsText)
-            val (beanName, clazz, method) = webSocketRoutes[protocol.type.trim().toLowerCase()]
+            val payload = Format.fromProtobuf(message.payload.asInputStream().readAllBytes())
+            val (beanName, method) = webSocketRoutes[payload::class.simpleName!!.toLowerCase()]
                 ?: return@flatMap Mono.just(UnsupportedOperationException())
             val bean = beanFactory.getBean(beanName)
-            val payload = objectMapper.convertValue(protocol.payload, clazz)
             val args = buildList(method.parameterCount) {
                 add(payload)
                 for (idx in 1 until method.parameterCount) {
@@ -66,12 +63,10 @@ class DefaultWebSocketHandler(
             mono(context) {
                 method.kotlinFunction?.callSuspend(bean, *args) ?: method.invoke(bean, *args)
             }
-        }.map {
-            session.textMessage(
-                objectMapper.writeValueAsString(
-                    WebSocketProtocol(type = it::class.qualifiedName!!, payload = it)
-                )
-            )
+        }.map { response ->
+            session.binaryMessage {
+                it.wrap(Format.toProtobuf(response))
+            }
         }
     )
 }

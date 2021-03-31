@@ -1,10 +1,11 @@
 package io.joel.springbank.api.command
 
-import io.joel.springbank.api.ObjectId
+import kotlinx.serialization.Serializable
 import kotlin.js.JsExport
 
 @JsExport
+@Serializable
 data class UpdateAccountCommand(
-    val id: ObjectId,
+    val id: String,
     val name: String,
 )
