@@ -1,6 +1,5 @@
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -16,10 +15,11 @@ kotlin {
         all {
             languageSettings.useExperimentalAnnotation("kotlin.RequiresOptIn")
             languageSettings.useExperimentalAnnotation("kotlin.js.ExperimentalJsExport")
-            languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
 
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.1.0")
+                api(project(":spring-bank-project:spring-bank-api"))
+                implementation("io.ktor:ktor-client-websockets:1.5.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
             }
         }
     }

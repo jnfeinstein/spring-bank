@@ -1,17 +1,16 @@
 package io.joel.springbank.server.aggregate
 
-import io.joel.springbank.api.command.CreateAccountCommand
-import io.joel.springbank.api.command.DeleteAccountCommand
-import io.joel.springbank.api.command.UpdateAccountCommand
-import io.joel.springbank.api.event.AccountCreatedEvent
-import io.joel.springbank.api.event.AccountDeletedEvent
-import io.joel.springbank.api.event.AccountUpdatedEvent
+import io.joel.springbank.server.domain.command.CreateAccountCommand
+import io.joel.springbank.server.domain.command.DeleteAccountCommand
+import io.joel.springbank.server.domain.command.UpdateAccountCommand
+import io.joel.springbank.server.domain.event.AccountCreatedEvent
+import io.joel.springbank.server.domain.event.AccountDeletedEvent
+import io.joel.springbank.server.domain.event.AccountUpdatedEvent
 import org.axonframework.commandhandling.CommandHandler
 import org.axonframework.eventsourcing.EventSourcingHandler
 import org.axonframework.modelling.command.AggregateIdentifier
 import org.axonframework.modelling.command.AggregateLifecycle
 import org.axonframework.spring.stereotype.Aggregate
-import java.util.*
 
 @Aggregate
 class Account() {

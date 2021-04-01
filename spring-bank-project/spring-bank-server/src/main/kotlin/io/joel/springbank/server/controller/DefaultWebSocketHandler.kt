@@ -1,6 +1,7 @@
 package io.joel.springbank.server.controller
 
 import io.joel.springbank.api.Format
+import io.joel.springbank.api.Message
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.mono
@@ -11,12 +12,12 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
 import org.springframework.web.reactive.socket.WebSocketSession
 import reactor.core.publisher.Mono
-import java.lang.reflect.Method
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.Continuation
-import kotlin.reflect.full.callSuspend
-import kotlin.reflect.jvm.kotlinFunction
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.*
+import kotlin.reflect.jvm.jvmErasure
+import kotlin.reflect.typeOf
 
 @MustBeDocumented
 @Target(AnnotationTarget.FUNCTION)
@@ -30,16 +31,26 @@ class DefaultWebSocketHandler(
     private val beanFactory: BeanFactory,
     private val context: CoroutineDispatcher = Dispatchers.Default,
 ) : WebSocketHandler, BeanPostProcessor {
-    private val webSocketRoutes: MutableMap<String, Pair<BeanName, Method>> = ConcurrentHashMap()
+    private val webSocketRoutes: MutableMap<String, Pair<BeanName, KFunction<Message>>> = ConcurrentHashMap()
 
-    override fun postProcessAfterInitialization(bean: Any, beanName: String) = bean.apply {
-        bean::class.java.methods.filter {
-            it.isAnnotationPresent(WebSocketRoute::class.java)
+    @Suppress("UNCHECKED_CAST")
+    @OptIn(ExperimentalStdlibApi::class)
+    override fun postProcessAfterInitialization(bean: Any, beanName: BeanName) = bean.apply {
+        try {
+            bean::class.memberFunctions
+        } catch (ex: Throwable) {
+            return@apply
+        }.filter {
+            it.hasAnnotation<WebSocketRoute>()
         }.forEach {
-            val clazz = it.parameters.first().type
-            val existingMapping = webSocketRoutes.putIfAbsent(clazz.simpleName.toLowerCase(), beanName to it)
+            check(it.returnType.classifier == Unit::class || it.returnType.isSubtypeOf(typeOf<Message?>())) {
+                "WebSocket route must return type ${Message::class.simpleName}."
+            }
+            it as KFunction<Message>
+            val clazz = it.valueParameters.first().type.jvmErasure
+            val existingMapping = webSocketRoutes.putIfAbsent(clazz.simpleName!!.toLowerCase(), beanName to it)
             check(existingMapping == null) {
-                "Type ${clazz.simpleName} associated with multiple WebSocket routes"
+                "Type ${clazz.simpleName} associated with multiple WebSocket routes."
             }
         }
     }
@@ -51,21 +62,16 @@ class DefaultWebSocketHandler(
             val (beanName, method) = webSocketRoutes[payload::class.simpleName!!.toLowerCase()]
                 ?: return@flatMap Mono.just(UnsupportedOperationException())
             val bean = beanFactory.getBean(beanName)
-            val args = buildList(method.parameterCount) {
-                add(payload)
-                for (idx in 1 until method.parameterCount) {
-                    if (method.parameters[idx].type != Continuation::class.java) {
-                        add(beanFactory.getBean(method.parameters[idx].type))
-                    }
-                }
+            val args = method.valueParameters.withIndex().map { (idx, parameter) ->
+                if (idx == 0) payload else beanFactory.getBean(parameter.type.jvmErasure.java)
             }.toTypedArray()
 
             mono(context) {
-                method.kotlinFunction?.callSuspend(bean, *args) ?: method.invoke(bean, *args)
+                method.callSuspend(bean, *args)
             }
         }.map { response ->
             session.binaryMessage {
-                it.wrap(Format.toProtobuf(response))
+                it.wrap(Format.toProtobuf(response as Message))
             }
         }
     )

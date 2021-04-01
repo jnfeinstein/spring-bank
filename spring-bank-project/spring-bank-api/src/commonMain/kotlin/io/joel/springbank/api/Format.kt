@@ -1,23 +1,32 @@
 package io.joel.springbank.api
 
-import io.joel.springbank.api.command.Command
-import io.joel.springbank.api.event.Event
+import io.joel.springbank.api.request.*
+import io.joel.springbank.api.response.AccountCreatedResponse
+import io.joel.springbank.api.response.AccountDeletedResponse
+import io.joel.springbank.api.response.AccountUpdatedResponse
 import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlinx.serialization.protobuf.ProtoBuf
-import kotlin.js.JsExport
 
-@JsExport
 object Format {
-    fun toProtobuf(obj: Any): ByteArray = format.encodeToByteArray(PolymorphicSerializer(Any::class), obj)
+    fun toProtobuf(obj: Message): ByteArray = format.encodeToByteArray(PolymorphicSerializer(Message::class), obj)
 
-    fun fromProtobuf(arr: ByteArray): Any = format.decodeFromByteArray(PolymorphicSerializer(Any::class), arr)
+    fun fromProtobuf(arr: ByteArray): Message = format.decodeFromByteArray(PolymorphicSerializer(Message::class), arr)
 
     private val format = ProtoBuf {
         serializersModule = SerializersModule {
-            polymorphic(Any::class) {
-                Command.registerSubclasses(this)
-                Event.registerSubclasses(this)
+            polymorphic(Message::class) {
+                // Requests
+                subclass(CreateAccountRequest::class)
+                subclass(DeleteAccountRequest::class)
+                subclass(EchoRequest::class)
+                subclass(NullRequest::class)
+                subclass(UnitRequest::class)
+                subclass(UpdateAccountRequest::class)
+                // Responses
+                subclass(AccountCreatedResponse::class)
+                subclass(AccountDeletedResponse::class)
+                subclass(AccountUpdatedResponse::class)
             }
         }
     }

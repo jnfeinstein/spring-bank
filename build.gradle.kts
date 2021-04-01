@@ -21,7 +21,7 @@ allprojects {
 		mavenCentral()
 	}
 
-	group = "io.joel"
+	group = "io.joel.springbank"
 	version = "0.0.1-SNAPSHOT"
 
 	kotlinter {

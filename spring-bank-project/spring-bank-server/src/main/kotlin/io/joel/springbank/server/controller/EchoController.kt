@@ -1,10 +1,10 @@
 package io.joel.springbank.server.controller
 
-import io.joel.springbank.api.command.EchoCommand
+import io.joel.springbank.api.request.EchoRequest
 import org.springframework.stereotype.Component
 
 @Component
 class EchoController {
     @WebSocketRoute
-    fun handle(command: EchoCommand) = command
+    fun handle(request: EchoRequest) = request
 }

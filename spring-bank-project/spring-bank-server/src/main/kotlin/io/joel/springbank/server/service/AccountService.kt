@@ -1,10 +1,10 @@
 package io.joel.springbank.server.service
 
-import io.joel.springbank.api.event.AccountCreatedEvent
-import io.joel.springbank.api.event.AccountDeletedEvent
-import io.joel.springbank.api.event.AccountUpdatedEvent
 import io.joel.springbank.server.db.AccountView
 import io.joel.springbank.server.db.AccountViewRepo
+import io.joel.springbank.server.domain.event.AccountCreatedEvent
+import io.joel.springbank.server.domain.event.AccountDeletedEvent
+import io.joel.springbank.server.domain.event.AccountUpdatedEvent
 import io.r2dbc.spi.ConnectionFactory
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -39,5 +39,6 @@ class AccountService(
     @EventHandler
     fun on(event: AccountDeletedEvent) = runBlocking {
         accountViewRepo.deleteById(UUID.fromString(event.id))
+        queryUpdateEmitter.emit(String::class.java, { it == event.id }, event)
     }
 }
