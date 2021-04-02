@@ -13,8 +13,8 @@ env:
   STACK_NAME: SpringBank
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [ released ]
 
 jobs:
   upload-templates:
