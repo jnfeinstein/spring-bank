@@ -5,5 +5,6 @@ object Versions {
     const val GRADLE_SPRING = "1.0.11.RELEASE"
     const val KOTLIN = "1.4.30"
     const val KOTLIN_LOGGING = "2.0.5"
+    const val NPM_PUBLISH = "1.1.3"
     const val SPRING_BOOT = "2.4.3"
 }

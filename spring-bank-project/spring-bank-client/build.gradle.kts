@@ -1,4 +1,5 @@
 plugins {
+    id("lt.petuska.npm.publish")
     kotlin("multiplatform")
 }
 
@@ -21,6 +22,25 @@ kotlin {
                 implementation("io.ktor:ktor-client-websockets:1.5.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
             }
+        }
+    }
+}
+
+npmPublishing {
+    organization = "jnfeinstein"
+
+    publications {
+        this["js"].packageJson {
+            repository {
+                url = "git://github.com/jnfeinstein/spring-bank.git"
+            }
+        }
+    }
+
+    repositories {
+        repository("github") {
+            registry = uri("https://npm.pkg.github.com")
+            authToken = System.getenv("GITHUB_AUTH_TOKEN")?.trim() ?: ""
         }
     }
 }
