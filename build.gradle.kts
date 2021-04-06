@@ -3,15 +3,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
 	base
-	id("com.palantir.docker") version Versions.GRADLE_DOCKER apply false
-	id("io.spring.dependency-management") version Versions.GRADLE_SPRING apply false
-	id("nu.studer.jooq") version "5.2" apply false
-	id("org.jmailen.kotlinter") version Versions.GRADLE_KTLINT
-	id("org.springframework.boot") version Versions.SPRING_BOOT apply false
-	kotlin("jvm") version Versions.KOTLIN apply false
-	kotlin("multiplatform") version Versions.KOTLIN  apply false
-	kotlin("plugin.serialization") version Versions.KOTLIN  apply false
-	kotlin("plugin.spring") version Versions.KOTLIN  apply false
+	id("org.jmailen.kotlinter")
+	idea
+}
+
+idea {
+	module {
+		isDownloadJavadoc = true
+		isDownloadSources = true
+	}
 }
 
 allprojects {
@@ -20,9 +20,6 @@ allprojects {
 	repositories {
 		mavenCentral()
 	}
-
-	group = "io.joel.springbank"
-	version = "0.0.1-SNAPSHOT"
 
 	kotlinter {
 		experimentalRules = true
