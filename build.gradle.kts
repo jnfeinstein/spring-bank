@@ -5,7 +5,6 @@ plugins {
 	base
 	id("com.palantir.docker") version Versions.GRADLE_DOCKER apply false
 	id("io.spring.dependency-management") version Versions.GRADLE_SPRING apply false
-	id("lt.petuska.npm.publish") version Versions.NPM_PUBLISH apply false
 	id("nu.studer.jooq") version "5.2" apply false
 	id("org.jmailen.kotlinter") version Versions.GRADLE_KTLINT
 	id("org.springframework.boot") version Versions.SPRING_BOOT apply false
