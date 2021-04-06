@@ -8,8 +8,8 @@ plugins {
 	id("nu.studer.jooq") version "5.2" apply false
 	id("org.jmailen.kotlinter") version Versions.GRADLE_KTLINT
 	id("org.springframework.boot") version Versions.SPRING_BOOT apply false
-	kotlin("jvm") version Versions.KOTLIN apply false
-	kotlin("multiplatform") version Versions.KOTLIN  apply false
+	kotlin("jvm") apply false
+	kotlin("multiplatform") apply false
 	kotlin("plugin.serialization") version Versions.KOTLIN  apply false
 	kotlin("plugin.spring") version Versions.KOTLIN  apply false
 }
