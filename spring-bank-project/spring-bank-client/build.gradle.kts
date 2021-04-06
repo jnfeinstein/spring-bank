@@ -1,5 +1,5 @@
 plugins {
-    id("springbank.npm-conventions")
+    // id("springbank.npm-conventions")
     kotlin("multiplatform")
 }
 
