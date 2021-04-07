@@ -6,4 +6,4 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-class NullRequest : Request
+public class NullRequest : Request

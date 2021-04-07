@@ -6,6 +6,6 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-data class DeleteAccountRequest(
+public data class DeleteAccountRequest(
     val id: String,
 ) : Request

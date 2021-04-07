@@ -7,23 +7,23 @@ import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.cio.websocket.*
 
-class Connection private constructor(private val session: WebSocketSession) {
-    suspend fun send(msg: Message) {
+public class Connection private constructor(private val session: WebSocketSession) {
+    public suspend fun send(msg: Message) {
         val data = Frame.Binary(true, Format.toProtobuf(msg))
         session.send(data)
     }
 
-    suspend fun receive(): Message {
+    public suspend fun receive(): Message {
         val data = session.incoming.receive().data
         return Format.fromProtobuf(data)
     }
 
-    suspend fun close() {
+    public suspend fun close() {
         session.close()
     }
 
-    companion object {
-        suspend fun open(url: String): Connection {
+    public companion object {
+        public suspend fun open(url: String): Connection {
             return Connection(
                 client.webSocketSession {
                     url(url)

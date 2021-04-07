@@ -9,28 +9,28 @@ import kotlin.js.JsName
 import kotlin.js.Promise
 
 @JsExport
-class PromiseConnection private constructor(private val delegate: Connection) {
+public class PromiseConnection private constructor(private val delegate: Connection) {
     @JsName("send")
-    fun send(msg: Message): Promise<*> = GlobalScope.promise {
+    public fun send(msg: Message): Promise<*> = GlobalScope.promise {
         delegate.send(msg)
     }
 
     @JsName("receive")
-    fun receive() = GlobalScope.promise {
+    public fun receive(): Promise<Message> = GlobalScope.promise {
         delegate.receive()
     }
 
     @JsName("close")
-    fun close(): Promise<*> = GlobalScope.promise {
+    public fun close(): Promise<*> = GlobalScope.promise {
         delegate.close()
     }
 
-    companion object {
-        fun open(url: String) = GlobalScope.promise {
+    public companion object {
+        public fun open(url: String): Promise<PromiseConnection> = GlobalScope.promise {
             PromiseConnection(Connection.open(url))
         }
     }
 }
 
 @JsExport
-fun connect(url: String) = PromiseConnection.open(url)
+public fun connect(url: String): Promise<PromiseConnection> = PromiseConnection.open(url)

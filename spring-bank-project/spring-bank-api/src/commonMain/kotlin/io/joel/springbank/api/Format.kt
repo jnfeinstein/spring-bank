@@ -8,10 +8,10 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlinx.serialization.protobuf.ProtoBuf
 
-object Format {
-    fun toProtobuf(obj: Message): ByteArray = format.encodeToByteArray(PolymorphicSerializer(Message::class), obj)
+public object Format {
+    public fun toProtobuf(obj: Message): ByteArray = format.encodeToByteArray(PolymorphicSerializer(Message::class), obj)
 
-    fun fromProtobuf(arr: ByteArray): Message = format.decodeFromByteArray(PolymorphicSerializer(Message::class), arr)
+    public fun fromProtobuf(arr: ByteArray): Message = format.decodeFromByteArray(PolymorphicSerializer(Message::class), arr)
 
     private val format = ProtoBuf {
         serializersModule = SerializersModule {

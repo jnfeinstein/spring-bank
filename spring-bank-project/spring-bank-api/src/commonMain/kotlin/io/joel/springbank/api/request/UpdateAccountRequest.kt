@@ -6,7 +6,7 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-data class UpdateAccountRequest(
+public data class UpdateAccountRequest(
     val id: String,
     val name: String,
 ) : Request

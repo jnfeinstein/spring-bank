@@ -6,6 +6,6 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-data class CreateAccountRequest(
+public data class CreateAccountRequest(
     val name: String,
 ) : Request

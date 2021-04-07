@@ -6,6 +6,6 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-data class AccountDeletedResponse(
+public data class AccountDeletedResponse(
     val id: String,
 ) : Response

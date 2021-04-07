@@ -6,4 +6,4 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-class UnitRequest : Request
+public class UnitRequest : Request

@@ -6,4 +6,4 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
-data class EchoRequest(val message: String) : Request
+public data class EchoRequest(val message: String) : Request
