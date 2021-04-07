@@ -1,6 +1,6 @@
 plugins {
-    // id("springbank.npm-conventions")
     kotlin("multiplatform")
+    id("springbank.npm-conventions")
 }
 
 kotlin {
@@ -19,7 +19,7 @@ kotlin {
 
             dependencies {
                 api(project(":spring-bank-project:spring-bank-api"))
-                implementation("io.ktor:ktor-client-websockets:1.5.2")
+                implementation("io.ktor:ktor-client-websockets:_")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
             }
         }

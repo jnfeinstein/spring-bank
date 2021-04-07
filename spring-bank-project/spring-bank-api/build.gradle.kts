@@ -1,5 +1,5 @@
 plugins {
-    // id("springbank.npm-conventions")
+    id("springbank.npm-conventions")
     kotlin("multiplatform")
     kotlin("plugin.serialization")
 }
@@ -20,7 +20,7 @@ kotlin {
             languageSettings.useExperimentalAnnotation("kotlinx.serialization.ExperimentalSerializationApi")
 
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.1.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:_")
             }
         }
     }
