@@ -1,5 +1,5 @@
 plugins {
-  id("lt.petuska.npm.publish")
+    id("lt.petuska.npm.publish")
 }
 
 npmPublishing {
