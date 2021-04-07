@@ -12,8 +12,8 @@ dependencies {
     implementation(project(":spring-bank-project:spring-bank-api"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("io.github.microutils:kotlin-logging-jvm:${Versions.KOTLIN_LOGGING}")
-    implementation("org.axonframework:axon-spring-boot-starter:${Versions.AXON_FRAMEWORK}") {
+    implementation("io.github.microutils:kotlin-logging-jvm:_")
+    implementation("org.axonframework:axon-spring-boot-starter:_") {
         exclude(group = "org.axonframework", module = "axon-server-connector")
     }
     implementation("org.flywaydb:flyway-core")
@@ -24,7 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:_")
     implementation("io.r2dbc:r2dbc-postgresql")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

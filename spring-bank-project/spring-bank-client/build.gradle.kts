@@ -1,6 +1,6 @@
 plugins {
-    id("lt.petuska.npm.publish")
     kotlin("multiplatform")
+    id("springbank.npm-conventions")
 }
 
 kotlin {
@@ -19,28 +19,9 @@ kotlin {
 
             dependencies {
                 api(project(":spring-bank-project:spring-bank-api"))
-                implementation("io.ktor:ktor-client-websockets:1.5.2")
+                implementation("io.ktor:ktor-client-websockets:_")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
             }
-        }
-    }
-}
-
-npmPublishing {
-    organization = "jnfeinstein"
-
-    publications {
-        this["js"].packageJson {
-            repository {
-                url = "git://github.com/jnfeinstein/spring-bank.git"
-            }
-        }
-    }
-
-    repositories {
-        repository("github") {
-            registry = uri("https://npm.pkg.github.com")
-            authToken = System.getenv("GITHUB_AUTH_TOKEN")?.trim() ?: ""
         }
     }
 }
